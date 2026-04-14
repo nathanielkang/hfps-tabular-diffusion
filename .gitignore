@@ -1,0 +1,39 @@
+# Data (confidential)
+*.csv
+data/
+
+# Checkpoints (generated)
+checkpoints/
+*.pt
+*.pkl
+
+# Output (generated)
+output/
+
+# Evaluation results (generated)
+evaluation_results/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environments
+.env
+.venv/
+env/
+venv/
