@@ -1,5 +1,5 @@
 """
-train.py - Train the tabular diffusion model on the HFPS dataset.
+train.py - Train TabOversample–HFPS (DDPM) on the HFPS 2024 survey extract.
 
 Usage:
     python train.py                       # full training (500 epochs)
@@ -25,7 +25,7 @@ from model import build_model, save_checkpoint
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Train HFPS diffusion model")
+    parser = argparse.ArgumentParser(description="Train TabOversample–HFPS (DDPM)")
     parser.add_argument("--smoke", action="store_true",
                         help="Use smoke-test hyperparameters")
     parser.add_argument("--epochs", type=int, default=None,

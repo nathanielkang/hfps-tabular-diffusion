@@ -1,5 +1,5 @@
 """
-smoke_test.py - Quick end-to-end sanity check (< 60 seconds on CPU).
+smoke_test.py - Quick end-to-end sanity check for TabOversample–HFPS (< 60 s on CPU).
 
 Tests:
   1. Preprocessor fit / transform / inverse_transform round-trip
@@ -93,7 +93,7 @@ def run_smoke_test():
 
     # Check categoricals in domain
     for col in CATEGORICAL_COLUMNS:
-        valid = set(v for _, v in prep.cat_decodings[col])
+        valid = set(prep.cat_inv_mappings[col].values())
         actual = set(df_synth[col].unique())
         assert actual.issubset(valid), (
             "FAIL: %s out-of-domain: %s" % (col, actual - valid)

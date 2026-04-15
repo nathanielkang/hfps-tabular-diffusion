@@ -1,5 +1,6 @@
 """
-config.py - Schema definition, hyperparameters, and paths for HFPS synthesis.
+config.py - Schema definition, hyperparameters, and paths for TabOversample–HFPS
+(HFPS 2024 survey extract).
 """
 
 import os
@@ -16,7 +17,7 @@ DATA_ENCODING = "utf-8-sig"
 CHECKPOINT_DIR = os.path.join(PROJECT_ROOT, "checkpoints")
 OUTPUT_DIR = os.path.join(PROJECT_ROOT, "output")
 
-DIFFUSION_DIR = os.path.join(PROJECT_ROOT, "diffusion")
+UAI_CODE_DIR = os.path.join(PROJECT_ROOT, "UAI", "supplementary", "code")
 
 # ---------------------------------------------------------------------------
 # Schema: 27 columns in exact delivery order

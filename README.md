@@ -1,10 +1,12 @@
-# HFPS Tabular Diffusion Synthesis
+# TabOversample–HFPS
 
-A diffusion-based synthetic data generator for the **2024 Korean Household Finance and Welfare Survey** (가계금융복지조사). Given a real survey table with **18,314 rows** and **27 columns** (11 numeric + 16 categorical), the model learns the joint distribution in a continuous latent space and generates a privacy-preserving synthetic copy that faithfully reproduces marginal distributions, inter-column correlations, and downstream predictive utility.
+**TabOversample–HFPS** is **our** method for joint synthetic generation of the **2024 Korean Household Finance and Welfare Survey (가계금융복지조사)** table: given the official survey extract, it learns the joint distribution in a continuous latent space and generates a privacy-preserving synthetic copy (**18,314 rows** × **27 columns**) that faithfully reproduces marginal distributions, inter-column correlations, and downstream predictive utility.
+
+**Naming.** **TabOversample** (UAI) is the **family** of tabular diffusion ideas (conditional relevance weighting, FiLM, etc.). **TabOversample–HFPS** is **this** deployment: **unconditional joint** diffusion for the HFPS extract. The **noise model** follows the standard **DDPM** objective (Ho et al., 2020; [arXiv:2006.11239](https://arxiv.org/abs/2006.11239))—we cite DDPM as prior work; the **method name** for this survey pipeline is **TabOversample–HFPS**.
 
 ## Key results
 
-| Metric | Ours (Diffusion) | CTGAN | TVAE |
+| Metric | TabOversample–HFPS | CTGAN | TVAE |
 |--------|:-:|:-:|:-:|
 | Avg KS (numeric fidelity) | **0.0140** | 0.1331 | 0.1057 |
 | Avg TVD (categorical fidelity) | **0.0192** | 0.0937 | 0.1072 |
@@ -22,11 +24,11 @@ Evaluated over three random seeds (42, 123, 456) with LightGBM as the downstream
 
 Generating realistic synthetic tabular data is fundamentally harder than image synthesis for two reasons: (1) tables contain a **heterogeneous mix** of numeric and categorical columns with very different statistical properties, and (2) the **inter-column dependency structure** (correlations, conditional distributions) must be preserved for the synthetic data to be useful in downstream analytics. GAN-based approaches (CTGAN, TVAE) address the mixed-type challenge through mode-specific normalization, but often suffer from mode collapse and poor correlation preservation, especially when the number of categorical levels is large.
 
-We take a different approach grounded in **Denoising Diffusion Probabilistic Models (DDPM)**. The core idea is to map every row of the mixed-type table into a **single, uniformly continuous latent vector** where all dimensions live in approximately standard-normal space, then train a standard Gaussian diffusion model in that space. This avoids one-hot encoding entirely (which is catastrophically incompatible with Gaussian noise) and eliminates the adversarial training instability of GANs.
+We take a different approach grounded in **TabOversample–HFPS**: map every row of the mixed-type table into a **single, uniformly continuous latent vector** where all dimensions live in approximately standard-normal space, then train a **DDPM** denoiser (Ho et al., 2020) in that space. This avoids one-hot encoding entirely (which is catastrophically incompatible with Gaussian noise) and eliminates the adversarial training instability of GANs.
 
 ### Overview
 
-The pipeline has three stages:
+The **TabOversample–HFPS** pipeline has three stages:
 
 1. **Encode** each survey row into a continuous latent vector via Gaussian quantile encoding (categoricals) and quantile-normalization (numerics).
 2. **Train** an unconditional DDPM that learns to denoise the latent vectors.
@@ -113,19 +115,19 @@ This guarantees that every synthetic row has valid, in-domain values with no mis
 
 ### Connection to TabOversample (UAI submission)
 
-This codebase shares its DDPM backbone with our **TabOversample** method submitted to UAI, which addresses a different problem: **imbalanced regression** via conditional diffusion with relevance-weighted loss $w(y)\,\|\boldsymbol{\epsilon} - \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t, y)\|^2$ and FiLM conditioning on the target $y$. The HFPS deployment here uses **unconditional** joint diffusion over all 27 dimensions without any target variable, relevance weighting, or FiLM layers. The figures below are from the UAI paper for conceptual context only.
+**TabOversample** (UAI) addresses **imbalanced regression** via conditional diffusion with relevance-weighted loss $w(y)\,\|\boldsymbol{\epsilon} - \boldsymbol{\epsilon}_\theta(\mathbf{x}_t, t, y)\|^2$ and FiLM conditioning on the target $y$. **TabOversample–HFPS** uses the same backbone *style* but **unconditional** joint diffusion over all 27 dimensions—no target variable, relevance weighting, or FiLM layers. The figures below illustrate **TabOversample** (UAI); they are **conceptual context** for the family, not a literal diagram of **TabOversample–HFPS**.
 
 <p align="center">
 <img src="assets/uai_fig1_rare_region_comparison.png" width="700" alt="Original vs SMOTER vs TabOversample in a rare charge region"/>
 </p>
 
-<p align="center"><em>Figure 1: Motivating example from the UAI TabOversample paper — rare-region oversampling comparison. The HFPS deployment here does not perform conditional oversampling.</em></p>
+<p align="center"><em>Figure 1: Motivating example from the UAI TabOversample paper — rare-region oversampling comparison. TabOversample–HFPS does not perform this conditional oversampling.</em></p>
 
 <p align="center">
 <img src="assets/uai_fig2_taboversample_framework.png" width="700" alt="TabOversample pipeline: relevance estimation, FiLM-conditioned diffusion, quality-filtered generation"/>
 </p>
 
-<p align="center"><em>Figure 2: TabOversample framework (UAI). HFPS uses the same DDPM backbone but without FiLM conditioning, relevance weighting, or quality filtering.</em></p>
+<p align="center"><em>Figure 2: TabOversample framework (UAI). TabOversample–HFPS uses the same DDPM backbone but without FiLM conditioning, relevance weighting, or quality filtering.</em></p>
 
 ### Why not one-hot encoding?
 
@@ -270,7 +272,7 @@ Synthetic quality is assessed under a three-tier protocol for fair comparison ag
 
 | Method | Avg KS | Avg TVD | Corr Diff (Frobenius) |
 |--------|:---:|:---:|:---:|
-| **Ours (Diffusion)** | **0.0140** | **0.0192** | **0.6252** |
+| **TabOversample–HFPS** | **0.0140** | **0.0192** | **0.6252** |
 | CTGAN | 0.1331 | 0.0937 | 1.2702 |
 | TVAE | 0.1057 | 0.1072 | 1.2228 |
 
@@ -279,7 +281,7 @@ Synthetic quality is assessed under a three-tier protocol for fair comparison ag
 | Method | Accuracy | Macro-F1 |
 |--------|:---:|:---:|
 | Real (TRTR, upper bound) | 0.9958 &plusmn; 0.0012 | 0.9953 &plusmn; 0.0015 |
-| **Ours (Diffusion)** | **0.9362 &plusmn; 0.0081** | **0.9337 &plusmn; 0.0107** |
+| **TabOversample–HFPS** | **0.9362 &plusmn; 0.0081** | **0.9337 &plusmn; 0.0107** |
 | TVAE | 0.7972 &plusmn; 0.0140 | 0.6859 &plusmn; 0.0168 |
 | CTGAN | 0.5417 &plusmn; 0.0064 | 0.4465 &plusmn; 0.0211 |
 
@@ -288,7 +290,7 @@ Synthetic quality is assessed under a three-tier protocol for fair comparison ag
 | Method | RMSE | R&sup2; |
 |--------|:---:|:---:|
 | Real (TRTR, upper bound) | 7,397 &plusmn; 603 | &minus;0.247 &plusmn; 0.094 |
-| **Ours (Diffusion)** | **5,190 &plusmn; 1,979** | **0.336 &plusmn; 0.445** |
+| **TabOversample–HFPS** | **5,190 &plusmn; 1,979** | **0.336 &plusmn; 0.445** |
 | CTGAN | 5,082 &plusmn; 475 | 0.393 &plusmn; 0.151 |
 | TVAE | 7,278 &plusmn; 1,095 | &minus;0.212 &plusmn; 0.260 |
 
@@ -310,9 +312,9 @@ Synthetic quality is assessed under a three-tier protocol for fair comparison ag
 If you find this code useful, please cite:
 
 ```bibtex
-@misc{kang2026hfps,
+@misc{kang2026taboversamplehfps,
   author = {Kang, Nathaniel},
-  title  = {HFPS Tabular Diffusion Synthesis},
+  title  = {TabOversample--HFPS: Tabular Synthetic Data for the Korean Household Finance and Welfare Survey},
   year   = {2026},
   url    = {https://github.com/nathanielkang/hfps-tabular-diffusion}
 }

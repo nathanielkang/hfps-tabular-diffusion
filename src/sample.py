@@ -24,7 +24,7 @@ from model import build_model, load_checkpoint
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Sample from trained HFPS model")
+    parser = argparse.ArgumentParser(description="Sample from trained TabOversample–HFPS model")
     parser.add_argument("--n-samples", type=int, default=N_ROWS,
                         help="Number of synthetic rows to generate")
     parser.add_argument("--checkpoint-dir", type=str, default=CHECKPOINT_DIR)

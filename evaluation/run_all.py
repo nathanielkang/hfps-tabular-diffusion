@@ -23,14 +23,14 @@ from baselines import train_ctgan, train_tvae
 
 
 def main():
-    parser = argparse.ArgumentParser(description="HFPS Evaluation Pipeline")
+    parser = argparse.ArgumentParser(description="TabOversample–HFPS evaluation pipeline")
     parser.add_argument("--smoke", action="store_true", help="Smoke test with 200 rows")
     parser.add_argument("--skip-baselines", action="store_true", help="Skip CTGAN/TVAE training")
     args = parser.parse_args()
 
     t_start = time.time()
     print("=" * 60)
-    print("HFPS Synthetic Data Evaluation Pipeline")
+    print("TabOversample–HFPS Synthetic Data Evaluation Pipeline")
     print("=" * 60)
 
     real_df = load_real()
