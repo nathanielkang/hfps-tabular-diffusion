@@ -38,13 +38,17 @@ The **TabOversample–HFPS** pipeline has three stages:
 
 Let a survey row be $\mathbf{x} = (x_1, \ldots, x_{27})$ with 11 numeric and 16 categorical columns. We define an encoder $E$ that maps $\mathbf{x}$ to a continuous vector $\mathbf{z}_0 = E(\mathbf{x}) \in \mathbb{R}^{27}$ with **no dimensionality expansion** (i.e., no one-hot encoding).
 
-**Numeric columns.** For each numeric column $j$, we apply a two-step normalization:
+**Numeric columns.** For each numeric column $j$, we apply a two-step normalization. We write **QT** for QuantileTransformer and **SS** for StandardScaler, and show the two steps on separate lines so the math stays legible in the GitHub viewer:
 
 $$
-x_j \;\xrightarrow{\text{QuantileTransformer}}\; \tilde{x}_j \;\xrightarrow{\text{StandardScaler}}\; z_j
+x_j \xrightarrow{\mathrm{QT}} \tilde{x}_j
 $$
 
-The QuantileTransformer maps the empirical CDF to a standard normal distribution, effectively Gaussianizing any skewed or heavy-tailed marginal. Outputs are clipped to $[-4.5, 4.5]$ to prevent extreme quantile artifacts. The subsequent StandardScaler enforces strict zero mean and unit variance on the training set.
+$$
+\tilde{x}_j \xrightarrow{\mathrm{SS}} z_j
+$$
+
+Here **QT** = `QuantileTransformer` and **SS** = `StandardScaler`. The QuantileTransformer maps the empirical CDF to a standard normal distribution, effectively Gaussianizing any skewed or heavy-tailed marginal. Outputs are clipped to $[-4.5, 4.5]$ to prevent extreme quantile artifacts. The subsequent StandardScaler enforces strict zero mean and unit variance on the training set.
 
 **Categorical columns.** For categorical column $j$ with $K_j$ ordered levels $v_{j,1}, \ldots, v_{j,K_j}$, we assign each level a deterministic position on the standard normal quantile grid:
 
