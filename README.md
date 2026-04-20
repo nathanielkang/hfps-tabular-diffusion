@@ -162,6 +162,14 @@ hfps-tabular-diffusion/
 │   ├── tstr.py                     # Tier C: Train-on-Synthetic, Test-on-Real
 │   ├── baselines.py                # CTGAN / TVAE baseline training
 │   └── run_all.py                  # CLI entrypoint for full evaluation
+├── extras/
+│   └── inter_record_metrics/       # Pairwise distance metrics (not part of training)
+│       ├── snn_loss.py             # SNN (Similarity of Nearest Neighbors)
+│       ├── dcr.py                  # DCR (Distance to Closest Record)
+│       ├── run_metrics.py          # CLI: compute both at once
+│       ├── docs/
+│       │   └── METRICS.md          # Full math: definitions, equations, references
+│       └── README.md               # Quick-start for the metrics tools
 ├── smoke_test.py                   # Quick end-to-end sanity check
 ├── requirements.txt                # Python dependencies
 ├── .gitignore
@@ -308,6 +316,24 @@ Synthetic quality is assessed under a three-tier protocol for fair comparison ag
 | Learnable parameters | 3,245,595 |
 | Wall time | ~44 min (CPU) |
 | Final MSE loss | 0.1756 |
+
+---
+
+## Extras: inter-record distance metrics
+
+The `extras/inter_record_metrics/` folder provides **two standalone pairwise-distance metrics** for comparing any real / synthetic tabular dataset pair. These are **not part of the diffusion training pipeline** — they are general-purpose evaluation tools.
+
+| Metric | What it measures | Ideal |
+|--------|-----------------|:-----:|
+| **SNN loss** — Similarity of Nearest Neighbors | Whether real and synthetic records mix evenly in $k$-NN space | $\mathrm{SNN}_{\text{mean}} \approx 0.5$ |
+| **DCR** — Distance to Closest Record | How far each synthetic record is from its nearest real record | $\rho \approx 1.0$ |
+
+Full mathematical definitions (with LaTeX equations), interpretation tables, and literature references are in [`extras/inter_record_metrics/docs/METRICS.md`](extras/inter_record_metrics/docs/METRICS.md).
+
+```bash
+cd extras/inter_record_metrics
+python run_metrics.py --real path/to/real.csv --synth path/to/synth.csv
+```
 
 ---
 
