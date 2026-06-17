@@ -370,7 +370,7 @@ python run_metrics.py --real path/to/real.csv --synth path/to/synth.csv
 | Phase | Deliverable | Goal |
 |-------|-------------|------|
 | **A** | Mock Parquet **streaming read** + feasibility (OOM yes/no) | Prove data path works |
-| **B** | Agreed train scope + **`n_syn` wall-clock table** (hardware noted) | Answer “feasible + how long?” |
+| **B** | Agreed train scope + **`n_syn` wall-clock table** (hardware noted) | Answer "feasible + how long?" |
 | **C** | **`generate(n_syn, seed)`** entrypoint for SynPersona | Reproducible integration |
 | **D** | Constraint rule format + dataset-specific rules (e.g. survey weights) | Valid synthetic rows |
 | **E** | Per-dataset configs for **six validation profiles** | Full agency coverage |
