@@ -337,64 +337,64 @@ python run_metrics.py --real path/to/real.csv --synth path/to/synth.csv
 
 ---
 
-﻿## Large-scale extension and SynPersona integration (roadmap)
+﻿## Large-scale extension and SynPersona integration — 대용량 확장 (roadmap)
 
-**Status:** engineering roadmap (June 2026). The **generative principle is unchanged** — encode → **DDPM** → decode → optional repair/rejection. This is an extension of the I/O layer, schema handling, training-at-scale strategy, and product integration; it is **not** a switch to a different synthesizer (e.g. STENCIL). The same DDPM core that powers the released HFPS pilot is what ships in the product.
+**Status:** engineering roadmap (June 2026). The **generative principle is unchanged — 동일 DDPM 핵심 (same DDPM core)**: encode → **DDPM** → decode → optional repair/rejection. This is an extension of the I/O layer, schema handling, training-at-scale strategy, and product integration; it is **not a switch to a different synthesizer — 합성기 교체 아님 (no method swap, e.g. not STENCIL)**. The same DDPM core that powers the released HFPS pilot is what ships in the product.
 
-### Current baseline (released)
-
-| Item | Value |
-|------|-------|
-| Validated scale | **18,314 rows × 27 columns** (HFPS CSV) |
-| Method | TabOversample–HFPS (DDPM in latent space) |
-| Repo focus | Reproducible training + synthesis for the HFPS pilot |
-
-### Target (National Data Agency / Greta mock)
+### Current baseline — 현재 기준선 (released)
 
 | Item | Value |
 |------|-------|
-| Stress-test mock | **~52M rows × 250 columns**, Parquet (~11 GB) |
-| Validation suite (2024) | Up to **51,805,547 rows** (population register); up to **243 columns** (household income & expenditure survey) |
-| Product | **SynPersona** — user-facing **`n_syn`** and **`random seed`** |
+| Validated scale — 검증된 규모 | **18,314 rows × 27 columns** (HFPS CSV) |
+| Method — 방법 | TabOversample–HFPS (DDPM in latent space) |
+| Repo focus — 저장소 범위 | Reproducible training + synthesis for the HFPS pilot |
 
-### What we extend (same DDPM core)
+### Target — 목표 (National Data Agency / Greta mock)
 
-1. **Parquet I/O** — streamed/chunked reads so the full ~52M-row table is never loaded into RAM at once.
-2. **Schema-driven encoding** — a YAML (or equivalent) column spec for numeric, categorical, and datetime types, supporting widths well beyond the original 27 columns.
-3. **Large-scale training** — subsampled or streaming epochs (policy agreed with Greta), reported transparently rather than implied.
-4. **Synthesis API** — `n_syn` controls the number of synthetic rows; `seed` is a non-zero integer → reproducible output, while **`0` → random**.
-5. **Constraints (Phase D)** — post-decode **repair → verify → reject**, aligned with the agency's inter-variable constraint requirements.
+| Item | Value |
+|------|-------|
+| Stress-test mock — 스트레스 테스트 목업 | **~52M rows × 250 columns**, Parquet (~11 GB) |
+| Validation suite (2024) — 검증 6종 | Up to **51,805,547 rows** (population register); up to **243 columns** (household income & expenditure survey) |
+| Product — 제품 | **SynPersona** — user-facing **`n_syn`** and **`random seed`** |
 
-### Phased delivery
+### What we extend — 무엇을 확장하나 (same DDPM core / 동일 DDPM 핵심)
+
+1. **Parquet I/O — 스트리밍 읽기 (streaming read).** Streamed/chunked reads so the full ~52M-row table is never loaded into RAM at once.
+2. **Schema-driven encoding — 스키마 기반 인코딩.** A YAML (or equivalent) column spec for numeric, categorical, and datetime types, supporting widths well beyond the original 27 columns.
+3. **Large-scale training — 대용량 학습.** Subsampled or streaming epochs (policy agreed with Greta), reported transparently rather than implied.
+4. **Synthesis API — 합성 API.** `n_syn` controls the number of synthetic rows; `seed` is a non-zero integer → reproducible output, while **`0` → random — 0이면 랜덤**.
+5. **Constraints (Phase D) — 제약 조건.** Post-decode **repair → verify → reject**, aligned with the agency's inter-variable constraint requirements.
+
+### Phased delivery — 단계별 제공
 
 | Phase | Deliverable | Goal |
 |-------|-------------|------|
-| **A** | Mock Parquet **streaming read** + feasibility (OOM: yes/no) | Prove the data path works |
-| **B** | Agreed training scope + **`n_syn` wall-clock table** (hardware noted) | Answer "feasible — and how long?" |
-| **C** | **`generate(n_syn, seed)`** entrypoint for SynPersona | Reproducible product integration |
-| **D** | Constraint rule format + dataset-specific rules (e.g. survey weights) | Valid synthetic rows |
-| **E** | Per-dataset configs for the **six validation profiles** | Full agency coverage |
+| **A** | Mock Parquet **streaming read — 스트리밍 읽기** + feasibility — 실현 가능성 (OOM: yes/no) | Prove the data path works |
+| **B** | Agreed training scope + **`n_syn` wall-clock table — 합성 시간표** (hardware noted) | Answer "feasible — and how long? / 가능한가, 얼마나 걸리나?" |
+| **C** | **`generate(n_syn, seed)`** entrypoint — 엔트리포인트 for SynPersona | Reproducible product integration — 재현 가능한 통합 |
+| **D** | Constraint rule format — 제약 규칙 포맷 + dataset-specific rules (e.g. survey weights — 가중치) | Valid synthetic rows |
+| **E** | Per-dataset configs for the **six validation profiles — 6종 검증 프로파일** | Full agency coverage |
 
-### Benchmark transparency
+### Benchmark transparency — 벤치마크 투명성
 
-Every report states, explicitly: **training row count**, **`n_syn`**, **seed**, **CPU/GPU**, **RAM**, and **wall-clock time**, together with a clear success/failure verdict. Subsampled or streaming training is **not** identical to full-population training; we document the exact benchmark that was run rather than implying single-machine full-epoch training over 52M rows.
+Every report states, explicitly: **training row count — 학습 행 수**, **`n_syn`**, **seed**, **CPU/GPU**, **RAM**, and **wall-clock time — 실측 시간**, together with a clear success/failure verdict — 성공/실패. Subsampled or streaming training is **not** identical to full-population training — 샘플/스트리밍 학습은 전량 학습과 동일하지 않음; we document the exact benchmark that was run rather than implying single-machine full-epoch training over 52M rows.
 
-### SynPersona API (draft)
+### SynPersona API (draft) — 초안
 
 ```python
 # Illustrative — exact surface (CLI / Python / REST) to be finalized with Greta.
+# 예시 — 정확한 형태(CLI / Python / REST)는 그레타와 확정.
 synthetic_df = generate(
     config="path/to/schema.yaml",
     checkpoint="path/to/model.pt",
     n_syn=100_000,
-    seed=42,   # 0 => non-deterministic (random) output
+    seed=42,   # 0 => non-deterministic (random) output / 0이면 매번 랜덤
 )
 ```
 
-Questions and timelines are coordinated with Greta (Chul Kim); this section is updated as each phase completes.
+Questions and timelines are coordinated with Greta (Chul Kim — 철이); this section is updated as each phase completes.
 
----
-## Citation
+---## Citation
 
 If you find this code useful, please cite:
 
