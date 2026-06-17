@@ -349,7 +349,7 @@ python run_metrics.py --real path/to/real.csv --synth path/to/synth.csv
 | Method — 방법 | TabOversample–HFPS (DDPM in latent space) |
 | Repo focus — 저장소 범위 | Reproducible training + synthesis for the HFPS pilot |
 
-### Target — 목표 (National Data Agency / Greta mock)
+### Target — 목표 (National Data Agency validation mock)
 
 | Item | Value |
 |------|-------|
@@ -361,7 +361,7 @@ python run_metrics.py --real path/to/real.csv --synth path/to/synth.csv
 
 1. **Parquet I/O — 스트리밍 읽기 (streaming read).** Streamed/chunked reads so the full ~52M-row table is never loaded into RAM at once.
 2. **Schema-driven encoding — 스키마 기반 인코딩.** A YAML (or equivalent) column spec for numeric, categorical, and datetime types, supporting widths well beyond the original 27 columns.
-3. **Large-scale training — 대용량 학습.** Subsampled or streaming epochs (policy agreed with Greta), reported transparently rather than implied.
+3. **Large-scale training — 대용량 학습.** Subsampled or streaming epochs (documented per benchmark run), reported transparently rather than implied.
 4. **Synthesis API — 합성 API.** `n_syn` controls the number of synthetic rows; `seed` is a non-zero integer → reproducible output, while **`0` → random — 0이면 랜덤**.
 5. **Constraints (Phase D) — 제약 조건.** Post-decode **repair → verify → reject**, aligned with the agency's inter-variable constraint requirements.
 
@@ -382,8 +382,8 @@ Every report states, explicitly: **training row count — 학습 행 수**, **`n
 ### SynPersona API (draft) — 초안
 
 ```python
-# Illustrative — exact surface (CLI / Python / REST) to be finalized with Greta.
-# 예시 — 정확한 형태(CLI / Python / REST)는 그레타와 확정.
+# Illustrative — exact surface (CLI / Python / REST) TBD at product integration.
+# 예시 — 정확한 형태(CLI / Python / REST)는 통합 시 확정.
 synthetic_df = generate(
     config="path/to/schema.yaml",
     checkpoint="path/to/model.pt",
@@ -392,7 +392,6 @@ synthetic_df = generate(
 )
 ```
 
-Questions and timelines are coordinated with Greta (Chul Kim — 철이); this section is updated as each phase completes.
 
 ---## Citation
 
