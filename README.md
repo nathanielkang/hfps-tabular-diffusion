@@ -337,6 +337,63 @@ python run_metrics.py --real path/to/real.csv --synth path/to/synth.csv
 
 ---
 
+## Large-scale extension and SynPersona integration (roadmap)
+
+**Status:** engineering roadmap (May 2026). The **generative principle is unchanged**: encode → **DDPM** → decode → optional repair/rejection. This is **not** a switch to another synthesizer (e.g. STENCIL); we extend I/O, schema handling, training at scale, and product integration.
+
+### Current baseline (released)
+
+| Item | Value |
+|------|-------|
+| Validated scale | **18,314 rows × 27 columns** (HFPS CSV) |
+| Method | TabOversample–HFPS (DDPM in latent space) |
+| Repo focus | Reproducible training + synthesis for the HFPS pilot |
+
+### Target (National Data Agency / Greta mock)
+
+| Item | Value |
+|------|-------|
+| Stress-test mock | **~52M rows × 250 columns**, Parquet (~11 GB) |
+| Validation suite (2024) | Up to **51,805,547 rows** (population register), up to **243 columns** (household income/expenditure survey) |
+| Product | **SynPersona** — user-facing **`n_syn`** and **`random seed`** |
+
+### What we extend (same DDPM core)
+
+1. **Parquet I/O** — stream/chunked reads; avoid loading full 52M into RAM.
+2. **Schema-driven encoding** — YAML (or equivalent) column types: numeric, categorical, datetime; variable width beyond 27 columns.
+3. **Large-scale training** — subsample or streaming epochs (policy TBD with Greta); transparent benchmark in reports.
+4. **Synthesis API** — `n_syn` rows; `seed`: non-zero integer → reproducible, **`0` → random**.
+5. **Constraints (Phase D)** — post-decode repair → verify → reject (aligned with agency constraint requirements).
+
+### Phased delivery
+
+| Phase | Deliverable | Goal |
+|-------|-------------|------|
+| **A** | Mock Parquet **streaming read** + feasibility (OOM yes/no) | Prove data path works |
+| **B** | Agreed train scope + **`n_syn` wall-clock table** (hardware noted) | Answer “feasible + how long?” |
+| **C** | **`generate(n_syn, seed)`** entrypoint for SynPersona | Reproducible integration |
+| **D** | Constraint rule format + dataset-specific rules (e.g. survey weights) | Valid synthetic rows |
+| **E** | Per-dataset configs for **six validation profiles** | Full agency coverage |
+
+### Benchmark transparency
+
+Reports will state explicitly: **training row count**, **`n_syn`**, **seed**, **CPU/GPU**, **RAM**, **wall-clock**, **success/failure**. Subsample/stream training is **not** identical to full-population training; we document the chosen benchmark rather than implying 52M full-epoch training on a single machine.
+
+### SynPersona API (draft)
+
+```python
+# Illustrative — exact surface TBD with Greta (CLI / Python / REST)
+synthetic_df = generate(
+    config="path/to/schema.yaml",
+    checkpoint="path/to/model.pt",
+    n_syn=100_000,
+    seed=42,   # 0 => non-deterministic
+)
+```
+
+Questions and timeline are coordinated with Greta (Chul Kim); this section will be updated as phases complete.
+
+---
 ## Citation
 
 If you find this code useful, please cite:
