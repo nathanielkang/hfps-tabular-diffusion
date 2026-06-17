@@ -393,7 +393,9 @@ synthetic_df = generate(
 ```
 
 
----## Citation
+---
+
+## Citation
 
 If you find this code useful, please cite:
 
