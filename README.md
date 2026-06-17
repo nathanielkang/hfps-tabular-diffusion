@@ -337,9 +337,9 @@ python run_metrics.py --real path/to/real.csv --synth path/to/synth.csv
 
 ---
 
-## Large-scale extension and SynPersona integration (roadmap)
+﻿## Large-scale extension and SynPersona integration (roadmap)
 
-**Status:** engineering roadmap (May 2026). The **generative principle is unchanged**: encode → **DDPM** → decode → optional repair/rejection. This is **not** a switch to another synthesizer (e.g. STENCIL); we extend I/O, schema handling, training at scale, and product integration.
+**Status:** engineering roadmap (June 2026). The **generative principle is unchanged** — encode → **DDPM** → decode → optional repair/rejection. This is an extension of the I/O layer, schema handling, training-at-scale strategy, and product integration; it is **not** a switch to a different synthesizer (e.g. STENCIL). The same DDPM core that powers the released HFPS pilot is what ships in the product.
 
 ### Current baseline (released)
 
@@ -354,44 +354,44 @@ python run_metrics.py --real path/to/real.csv --synth path/to/synth.csv
 | Item | Value |
 |------|-------|
 | Stress-test mock | **~52M rows × 250 columns**, Parquet (~11 GB) |
-| Validation suite (2024) | Up to **51,805,547 rows** (population register), up to **243 columns** (household income/expenditure survey) |
+| Validation suite (2024) | Up to **51,805,547 rows** (population register); up to **243 columns** (household income & expenditure survey) |
 | Product | **SynPersona** — user-facing **`n_syn`** and **`random seed`** |
 
 ### What we extend (same DDPM core)
 
-1. **Parquet I/O** — stream/chunked reads; avoid loading full 52M into RAM.
-2. **Schema-driven encoding** — YAML (or equivalent) column types: numeric, categorical, datetime; variable width beyond 27 columns.
-3. **Large-scale training** — subsample or streaming epochs (policy TBD with Greta); transparent benchmark in reports.
-4. **Synthesis API** — `n_syn` rows; `seed`: non-zero integer → reproducible, **`0` → random**.
-5. **Constraints (Phase D)** — post-decode repair → verify → reject (aligned with agency constraint requirements).
+1. **Parquet I/O** — streamed/chunked reads so the full ~52M-row table is never loaded into RAM at once.
+2. **Schema-driven encoding** — a YAML (or equivalent) column spec for numeric, categorical, and datetime types, supporting widths well beyond the original 27 columns.
+3. **Large-scale training** — subsampled or streaming epochs (policy agreed with Greta), reported transparently rather than implied.
+4. **Synthesis API** — `n_syn` controls the number of synthetic rows; `seed` is a non-zero integer → reproducible output, while **`0` → random**.
+5. **Constraints (Phase D)** — post-decode **repair → verify → reject**, aligned with the agency's inter-variable constraint requirements.
 
 ### Phased delivery
 
 | Phase | Deliverable | Goal |
 |-------|-------------|------|
-| **A** | Mock Parquet **streaming read** + feasibility (OOM yes/no) | Prove data path works |
-| **B** | Agreed train scope + **`n_syn` wall-clock table** (hardware noted) | Answer "feasible + how long?" |
-| **C** | **`generate(n_syn, seed)`** entrypoint for SynPersona | Reproducible integration |
+| **A** | Mock Parquet **streaming read** + feasibility (OOM: yes/no) | Prove the data path works |
+| **B** | Agreed training scope + **`n_syn` wall-clock table** (hardware noted) | Answer "feasible — and how long?" |
+| **C** | **`generate(n_syn, seed)`** entrypoint for SynPersona | Reproducible product integration |
 | **D** | Constraint rule format + dataset-specific rules (e.g. survey weights) | Valid synthetic rows |
-| **E** | Per-dataset configs for **six validation profiles** | Full agency coverage |
+| **E** | Per-dataset configs for the **six validation profiles** | Full agency coverage |
 
 ### Benchmark transparency
 
-Reports will state explicitly: **training row count**, **`n_syn`**, **seed**, **CPU/GPU**, **RAM**, **wall-clock**, **success/failure**. Subsample/stream training is **not** identical to full-population training; we document the chosen benchmark rather than implying 52M full-epoch training on a single machine.
+Every report states, explicitly: **training row count**, **`n_syn`**, **seed**, **CPU/GPU**, **RAM**, and **wall-clock time**, together with a clear success/failure verdict. Subsampled or streaming training is **not** identical to full-population training; we document the exact benchmark that was run rather than implying single-machine full-epoch training over 52M rows.
 
 ### SynPersona API (draft)
 
 ```python
-# Illustrative — exact surface TBD with Greta (CLI / Python / REST)
+# Illustrative — exact surface (CLI / Python / REST) to be finalized with Greta.
 synthetic_df = generate(
     config="path/to/schema.yaml",
     checkpoint="path/to/model.pt",
     n_syn=100_000,
-    seed=42,   # 0 => non-deterministic
+    seed=42,   # 0 => non-deterministic (random) output
 )
 ```
 
-Questions and timeline are coordinated with Greta (Chul Kim); this section will be updated as phases complete.
+Questions and timelines are coordinated with Greta (Chul Kim); this section is updated as each phase completes.
 
 ---
 ## Citation
